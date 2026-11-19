@@ -5,7 +5,7 @@ names = ["Sam", "Audrey"]
 usernames = ["sam", "audrey"]
 passwords = ["12345", "789"]
 
-hashed_pw = stauth.Hasher(passwords).generate()
+hashed_pw = stauth.Hasher().hash_list(passwords)
 
 credentials = {
     "usernames": {
@@ -22,9 +22,15 @@ authenticator = stauth.Authenticate(
     30 # cookies will expire 30 days after generation
 )
 
-name, authentication_status, username = authenticator.login("Login", "main")
+try:
+    authenticator.login(location="main")
+except Exception as e:
+    st.error(e)
 
-if authentication_status:
-    st.success(f"Welcome {name}!")
-elif authentication_status is False:
-    st.error("Invalid username or password.")
+if st.session_state.get("authentication_status"):
+    authenticator.logout()
+    st.write(f'Welcome {st.session_state.get("name")}')
+elif st.session_state.get("authentication_status") is False:
+    st.error("Username/password is incorrect")
+elif st.session_state.get("authentication_status") is None:
+    st.warning("Please enter your username and password")
